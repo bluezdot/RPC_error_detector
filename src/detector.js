@@ -1,3 +1,6 @@
+// Import
+import { ApiPromise, WsProvider } from '@polkadot/api';
+
 async function connectToProvider(providerUrl) {
     const wsProvider = new WsProvider(providerUrl);
 
