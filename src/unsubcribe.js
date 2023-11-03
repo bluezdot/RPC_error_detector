@@ -18,7 +18,7 @@ async function main () {
     setTimeout(() => {
       unsubscribe();
       console.log('Unsubscribed');
-    }, 20000);
+    }, 2000);
   }
 
   main().catch(console.error);

@@ -2,30 +2,17 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
 async function main () {
-    const successful = new Set();
-    const unsuccessful = new Set();
 
     // Connect WS
-    const wsProvider = new WsProvider('wss://rpc.efinity.io');
 
-    wsProvider.on('disconnected', () => {
-        console.log('provider', 'disconnected');
-        throw new Error('WebSocket disconnected');
-    });
-
-    wsProvider.on('connected', () => console.log('provider', 'connected'));
-
-    wsProvider.on('error', (error) => {
-        console.log('provider', 'error', error);
-        throw new Error('WebSocket error');
-    });
     // wsProvider.on('disconnected', () => unsuccessful.add(wsProvider));
     // wsProvider.on('connected', () => successful.add(wsProvider));
     // wsProvider.on('error', (error) => unsuccessful.add(wsProvider));
 
     try {
+        const wsProvider = new WsProvider('wss://rpc.efi3211e2nity.io');
         const api = await ApiPromise.create({provider: wsProvider});
-        // Rest of your code after successful connection
+        console.log("success")
     } catch (error) {
         console.error(error);
     } finally {

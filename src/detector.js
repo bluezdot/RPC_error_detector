@@ -23,7 +23,7 @@ async function connectToProvider(providerUrl) {
 }
 
 async function main() {
-    const providerList = ['wss://rpc.efinity.io', 'wss://rpc.polkadot.io', 'wss://ws.rococo.dolphin.engineering']
+    const providerList = ['wss://shibuya-rpc.dwellir.com']
 
     const successful = [];
     const unsuccessful = [];
