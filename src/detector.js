@@ -23,7 +23,7 @@ async function connectToProvider(providerUrl) {
 }
 
 async function main() {
-    const providerList = ['wss://shibuya-rpc.dwellir.com']
+    const providerList = ['wss://rpc.relay.blockchain.enjin.io/']
 
     const successful = [];
     const unsuccessful = [];

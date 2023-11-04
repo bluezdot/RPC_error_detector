@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "@polkadot/api": "^10.10.1"
+    "@polkadot/api": "^10.10.1",
+    "ethers": "^6.8.1"
   }
 }
