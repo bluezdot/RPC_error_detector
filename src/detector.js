@@ -23,7 +23,7 @@ async function connectToProvider(providerUrl) {
 }
 
 async function main() {
-    const providerList = ['wss://rpc.relay.blockchain.enjin.io/']
+    const providerList = ['wss://wss.api.moonbeam.network', 'wss://moonbeam.api.onfinality.io/public-ws', 'wss://moonbeam-rpc.dwellir.com', 'wss://1rpc.io/glmr', 'wss://moonbeam.public.blastapi.io']
 
     const successful = [];
     const unsuccessful = [];
