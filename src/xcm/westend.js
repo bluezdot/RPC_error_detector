@@ -23,14 +23,14 @@ async function teleport() {
     await cryptoWaitReady();
     keyring.loadAll({ ss58Format: 42, type: 'sr25519' });
     const recipientParaId = 1000;
-    const amount = "100000000000";
-    const toAddr = "FtyWs31VbvNbERc6VC1ZSW6ZmYPMmaj5ZKPBKsJckhiddqF"; // Địa chỉ trên Assethub
+    const amount = "1000000000000";
+    const toAddr = "5FPMrYh8sEuSqacAKnNxfV96RBG9Z6mYdBUdnfbM8xVDtaVj"; // Địa chỉ trên Assethub
 
     // let fromAddr = "5FPMrYh8sEuSqacAKnNxfV96RBG9Z6mYdBUdnfbM8xVDtaVj";
     const mnemonic = 'hair myth once wine buffalo loan force because long dolphin nut physical';
     const { pair, json } = keyring.addUri(mnemonic, '123123123', { name: 'name' });
-    console.log("KEY PAIR: ", pair.toJson());
-    console.log("Json: ", json);
+    // console.log("KEY PAIR: ", pair.toJson());
+    // console.log("Json: ", json);
 
     const bl1 = await api.query.system.account(pair.address);
     console.log("BALANCE: ", bl1.toJSON().data.free/10**12);
@@ -71,10 +71,10 @@ async function teleport() {
             }]
     };
     let feeAssetItem = 0;
-    let feeLimitObj = { Unlimited: null };
+    // let feeLimitObj = { Unlimited: null };
 
     // CREATE AND SEND TX
-    let tx = await api.tx.xcmPallet.limitedTeleportAssets(dest, beneficiary, assets, feeAssetItem, feeLimitObj);
+    let tx = await api.tx.xcmPallet.teleportAssets(dest, beneficiary, assets, feeAssetItem);
     
     let hash = await tx.signAndSend(pair, ({ events = [], status }) => {
         console.log('Transaction status:', status.type);
@@ -92,7 +92,6 @@ async function teleport() {
             process.exit(0);
         }
     });
-    // console.log("Hash: ");
     const bl2 = await api.query.system.account(pair.address);
     console.log("BALANCE: ", bl2.toJSON().data.free/10**12);
 }
