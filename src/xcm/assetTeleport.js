@@ -1,7 +1,7 @@
 // Import
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import keyring from '@polkadot/ui-keyring';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { cryptoWaitReady, decodeAddress } from '@polkadot/util-crypto';
 
 async function main () {
     try {
@@ -17,14 +17,14 @@ async function main () {
 async function teleport() {
 
     // SET UP
-    const pr ='wss://rpc.dotters.network/westend'   
+    const pr ='wss://rococo-rpc.polkadot.io'   
     const wsProvider = new WsProvider(pr);
     const api = await ApiPromise.create({ provider: wsProvider });
     await cryptoWaitReady();
     keyring.loadAll({ ss58Format: 42, type: 'sr25519' });
-    const recipientParaId = 1000;
-    const amount = "100000000000";
-    const toAddr = "FtyWs31VbvNbERc6VC1ZSW6ZmYPMmaj5ZKPBKsJckhiddqF"; // Địa chỉ trên Assethub
+    const recipientParaId = 1000; // Destination parachain ID
+    const amount = "100000000000"; // Amount to send
+    const toAddr = "FtyWs31VbvNbERc6VC1ZSW6ZmYPMmaj5ZKPBKsJckhiddqF"; // Destination address
 
     // let fromAddr = "5FPMrYh8sEuSqacAKnNxfV96RBG9Z6mYdBUdnfbM8xVDtaVj";
     const mnemonic = 'hair myth once wine buffalo loan force because long dolphin nut physical';
@@ -32,17 +32,18 @@ async function teleport() {
     console.log("KEY PAIR: ", pair.toJson());
     console.log("Json: ", json);
 
-    const bl1 = await api.query.system.account(pair.address);
-    console.log("BALANCE: ", bl1.toJSON().data.free/10**12);
+    const bl1 = api.query.system.account(pair.address, (result) => {
+        console.log('balance latest', result.toJSON().data.free/10**12);
+    });
 
     let dest = {
         V3: {
                 interior: {
                     X1: {
-                        ParaChain: recipientParaId
+                        ParaChain: recipientParaId,
                     }
                 },
-                parents: 0
+                parents: 1
             }
     };
     let beneficiary = {
@@ -50,7 +51,7 @@ async function teleport() {
             interior: {
                 X1: {
                     AccountId32: {
-                        id: api.createType('AccountId32', toAddr).toHex()
+                        id: decodeAddress(toAddr)
                     }
                 }
             },
@@ -74,9 +75,9 @@ async function teleport() {
     let feeLimitObj = { Unlimited: null };
 
     // CREATE AND SEND TX
-    let tx = await api.tx.xcmPallet.limitedTeleportAssets(dest, beneficiary, assets, feeAssetItem, feeLimitObj);
-    
-    let hash = await tx.signAndSend(pair, ({ events = [], status }) => {
+    let tx = api.tx.xcmPallet.limitedTeleportAssets(dest, beneficiary, assets, feeAssetItem, feeLimitObj);
+
+    let hash = tx.signAndSend(pair, { nonce: 662 }, ({ events = [], status }) => {
         console.log('Transaction status:', status.type);
 
         if (status.isInBlock) {
@@ -89,10 +90,12 @@ async function teleport() {
         } else if (status.isFinalized) {
             console.log('Finalized block hash', status.asFinalized.toHex());
 
-            process.exit(0);
+            api.query.system.account(pair.address).then((balance) => {
+                console.log("BALA", balance.toJSON().data.free/10**12);
+            }).catch(console.error);
         }
     });
-    // console.log("Hash: ");
+    console.log("Hash: ", hash.toString());
     const bl2 = await api.query.system.account(pair.address);
     console.log("BALANCE: ", bl2.toJSON().data.free/10**12);
 }

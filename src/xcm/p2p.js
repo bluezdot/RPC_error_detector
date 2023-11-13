@@ -1,7 +1,7 @@
 // Import
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import keyring from '@polkadot/ui-keyring';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { cryptoWaitReady, decodeAddress} from '@polkadot/util-crypto';
 
 async function main () {
     try {
@@ -17,20 +17,16 @@ async function main () {
 async function teleport() {
 
     // SET UP
-    const pr ='wss://rpc.dotters.network/westend';
+    const pr ='wss://westend-asset-hub-rpc.polkadot.io'; // Sender
     const wsProvider = new WsProvider(pr);
     const api = await ApiPromise.create({ provider: wsProvider });
     await cryptoWaitReady();
     keyring.loadAll({ ss58Format: 42, type: 'sr25519' });
-    const recipientParaId = 1000;
-    const amount = "100000000000";
-    const toAddr = "5FPMrYh8sEuSqacAKnNxfV96RBG9Z6mYdBUdnfbM8xVDtaVj"; // Địa chỉ trên Assethub
-
-    // let fromAddr = "5FPMrYh8sEuSqacAKnNxfV96RBG9Z6mYdBUdnfbM8xVDtaVj";
+    const recipientParaId = 1002; // Destination parachain ID
+    const amount = "100000000000"; // Amount to send
+    const toAddr = "FtyWs31VbvNbERc6VC1ZSW6ZmYPMmaj5ZKPBKsJckhiddqF"; // Địa chỉ trên Assethub
     const mnemonic = 'hair myth once wine buffalo loan force because long dolphin nut physical';
     const { pair, json } = keyring.addUri(mnemonic, '123123123', { name: 'name' });
-    console.log("KEY PAIR: ", pair.address);
-    console.log("Json: ", json);
 
     const bl1 = await api.query.system.account(pair.address);
     console.log("BALANCE: ", bl1.toJSON().data.free/10**12);
@@ -65,32 +61,33 @@ async function teleport() {
                 id: {
                     Concrete: {
                         interior: 'Here',
-                        parents: 1
+                        parents: 0
                     }
                 }
             }]
     };
     let feeAssetItem = 0;
-    // let feeLimitObj = { Unlimited: null };
+    let feeLimitObj = { Unlimited: null };
 
     // CREATE AND SEND TX
-    let tx = api.tx.xcmPallet.teleportAssets(dest, beneficiary, assets, feeAssetItem);
-    
-    let hash = await tx.signAndSend(pair, ({ events = [], status }) => {
-        console.log('Transaction status:', status.type);
+    let tx = api.tx.polkadotXcm.limitedReserveTransferAssets(dest, beneficiary, assets, feeAssetItem, feeLimitObj);
+    console.log("TX: ", tx.toHex());
 
-        if (status.isInBlock) {
-            console.log('Included at block hash', status.asInBlock.toHex());
-            console.log('Events:');
+    // let hash = await tx.signAndSend(pair, ({ events = [], status }) => {
+    //     console.log('Transaction status:', status.type);
 
-            events.forEach(({ phase, event: { data, method, section } }) => {
-                console.log('\t', phase.toString(), `: ${section}.${method}`, data.toString());
-            });
-        } else if (status.isFinalized) {
-            console.log('Finalized block hash', status.asFinalized.toHex());
-            process.exit(0);
-        }
-    });
+    //     if (status.isInBlock) {
+    //         console.log('Included at block hash', status.asInBlock.toHex());
+    //         console.log('Events:');
+
+    //         events.forEach(({ phase, event: { data, method, section } }) => {
+    //             console.log('\t', phase.toString(), `: ${section}.${method}`, data.toString());
+    //         });
+    //     } else if (status.isFinalized) {
+    //         console.log('Finalized block hash', status.asFinalized.toHex());
+    //         process.exit(0);
+    //     }
+    // });
 
     console.log("Hash: ", hash.toString());
     const bl2 = await api.query.system.account(pair.address);
@@ -98,3 +95,8 @@ async function teleport() {
 }
     
 main();
+
+// https://polkadot.subscan.io/xcm_message/polkadot-2980425b141364b64f8945b69068008aa54c4c7c ??
+// https://polkadot.subscan.io/xcm_message/polkadot-65d0f6364b41fc3b795193c127a7f86a83bf29b8 ??
+// PalletInstance, GeneralIndex ???
+
